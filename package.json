@@ -8,12 +8,12 @@
   "author": "rynn-k",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rynn-k/gemini-core.git"
+    "url": "https://github.com/rynn-k/Gemini-Reverse.git"
   },
   "bugs": {
-    "url": "https://github.com/rynn-k/gemini-core/issues"
+    "url": "https://github.com/rynn-k/Gemini-Reverse/issues"
   },
-  "homepage": "https://github.com/rynn-k/gemini-core#readme",
+  "homepage": "https://github.com/rynn-k/Gemini-Reverse#readme",
   "keywords": [
     "gemini",
     "google-gemini",
