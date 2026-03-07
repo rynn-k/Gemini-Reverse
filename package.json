@@ -1,0 +1,35 @@
+{
+  "name": "gemini-reverse",
+  "version": "1.0.1",
+  "description": "Unofficial Node.js client for gemini.google.com — inspired by Gemini-API (Python). Supports streaming, chat sessions, gems, file uploads, and TypeScript.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "author": "rynn-k",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rynn-k/gemini-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rynn-k/gemini-core/issues"
+  },
+  "homepage": "https://github.com/rynn-k/gemini-core#readme",
+  "keywords": [
+    "gemini",
+    "google-gemini",
+    "gemini-api",
+    "nodejs",
+    "javascript",
+    "typescript",
+    "reverse-engineering",
+    "chatbot",
+    "ai",
+    "llm",
+    "unofficial"
+  ],
+  "dependencies": {
+    "axios": "^1.13.6",
+    "form-data": "^4.0.5",
+    "uuid": "^13.0.0"
+  }
+}
