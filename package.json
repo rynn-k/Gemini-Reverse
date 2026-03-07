@@ -1,6 +1,6 @@
 {
   "name": "gemini-reverse",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Unofficial Node.js client for gemini.google.com — inspired by Gemini-API (Python). Supports streaming, chat sessions, gems, file uploads, and TypeScript.",
   "main": "index.js",
   "types": "index.d.ts",
