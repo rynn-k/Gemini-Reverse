@@ -45,7 +45,7 @@ This package uses browser cookies to authenticate with Gemini. You need to obtai
 ## Quick Start
 
 ```js
-const { GeminiClient } = require('gemini-core');
+const { GeminiClient } = require('gemini-reverse');
 
 const client = new GeminiClient({
     secure_1psid: 'YOUR_SECURE_1PSID',
@@ -253,7 +253,7 @@ await client.close();
 This package includes full TypeScript declarations out of the box.
 
 ```ts
-import { GeminiClient, ChatSession, ModelOutput, ConversationTurn, Gem, Model } from 'gemini-api';
+import { GeminiClient, ChatSession, ModelOutput, ConversationTurn, Gem, Model } from 'gemini-reverse';
 
 const client = new GeminiClient({ secure_1psid: '...' });
 await client.init();
@@ -305,7 +305,7 @@ const {
     UsageLimitExceeded,
     ModelInvalid,
     TemporarilyBlocked,
-} = require('gemini-api');
+} = require('gemini-reverse');
 
 try {
     const response = await chat.sendMessage({ prompt: 'Hello!' });
