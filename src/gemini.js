@@ -4,6 +4,7 @@ const axios = require('axios');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
+
 const {
     Endpoint, GRPC, Headers, Model, ErrorCode,
     TEMPORARY_CHAT_FLAG_INDEX, STREAMING_FLAG_INDEX, GEM_FLAG_INDEX,
@@ -483,38 +484,46 @@ class Gemini {
         };
 
         const yielded = [];
-        await new Promise((resolve, reject) => {
-            const watchdog = setInterval(() => {
-                if (!isThinking && !isQueueing && (Date.now() - lastProg) > Math.min(this.timeout, this.watchdogTimeout)) {
-                    clearInterval(watchdog);
-                    reject(new APIError('Response stalled (zombie stream).'));
+        let streamError = null;
+
+        const watchdog = setInterval(() => {
+            if (!isThinking && !isQueueing && (Date.now() - lastProg) > Math.min(this.timeout, this.watchdogTimeout)) {
+                streamError = new APIError('Response stalled (zombie stream).');
+                res.data.destroy(streamError);
+            }
+        }, 1000);
+
+        try {
+            for await (const chunk of res.data) {
+                const parts = frameParser.feed(chunk.toString('utf8'));
+                const outs = processParts(parts);
+                if (outs.length || isThinking || isQueueing) lastProg = Date.now();
+                for (const o of outs) {
+                    yielded.push(o);
+                    hasGeneratedText = true;
+                    yield o;
                 }
-            }, 1000);
+            }
 
-            res.data.on('data', chunk => {
-                try {
-                    const parts = frameParser.feed(chunk.toString('utf8'));
-                    const outs = processParts(parts);
-                    for (const o of outs) yielded.push(o);
-                    if (outs.length || isThinking || isQueueing) lastProg = Date.now();
-                } catch (e) { clearInterval(watchdog); reject(e); }
-            });
+            const remaining = frameParser.flush();
+            const finalOuts = processParts(remaining);
+            for (const o of finalOuts) {
+                yielded.push(o);
+                hasGeneratedText = true;
+                yield o;
+            }
+        } catch (e) {
+            streamError = e;
+        } finally {
+            clearInterval(watchdog);
+        }
 
-            res.data.on('end', () => {
-                clearInterval(watchdog);
-                try {
-                    const remaining = frameParser.flush();
-                    for (const o of processParts(remaining)) yielded.push(o);
-                    const hasMediaOrVideo = yielded.some(o => o.videos?.length > 0 || o.media?.length > 0);
-                    if (!isCompleted && !isFinalChunk && !hasMediaOrVideo) reject(new APIError('Stream interrupted or truncated.'));
-                    else resolve();
-                } catch (e) { reject(e); }
-            });
+        if (streamError) throw streamError;
 
-            res.data.on('error', e => { clearInterval(watchdog); reject(new APIError(`Stream error: ${e.message}`)); });
-        });
-
-        hasGeneratedText = yielded.length > 0;
+        const hasMediaOrVideo = yielded.some(o => o.videos?.length > 0 || o.media?.length > 0);
+        if (!isCompleted && !isFinalChunk && !hasMediaOrVideo) {
+            throw new APIError('Stream interrupted or truncated.');
+        }
 
         if ((!isCompleted || isThinking || isQueueing) && cid && isFinalChunk) {
             const pollStart = Date.now();
@@ -553,8 +562,6 @@ class Gemini {
                 await sleep(sleepTime);
             }
         }
-
-        for (const o of yielded) { hasGeneratedText = true; yield o; }
     }
 
     async _getGuestCookie() {
